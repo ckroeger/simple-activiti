@@ -29,30 +29,37 @@ public class Main {
     private static final int INACTIVITY_CHECK_INTERVAL_MS = 500;
 
     private static final Random SHARED_RANDOM = new Random();
+    private static boolean quietMode = false;
 
     public static void main(String[] args) {
         int mode = STANDARD_MODE;
-        // Modus aus Argumenten bestimmen
+        // Argumente parsen
         if (args != null && args.length > 0) {
-            String input = args[0].trim();
-            try {
-                mode = Integer.parseInt(input);
-                if (mode != 1 && mode != 2) {
-                    logger.warning(String.format("Ungueltiger Modus: %s. Standardmodus %d wird verwendet.", input, STANDARD_MODE));
-                    mode = STANDARD_MODE;
+            for (String arg : args) {
+                if ("-q".equals(arg)) {
+                    quietMode = true;
+                } else {
+                    String input = arg.trim();
+                    try {
+                        mode = Integer.parseInt(input);
+                        if (mode != 1 && mode != 2) {
+                            logWarning(String.format("Ungueltiger Modus: %s. Standardmodus %d wird verwendet.", input, STANDARD_MODE));
+                            mode = STANDARD_MODE;
+                        }
+                    } catch (NumberFormatException e) {
+                        logWarning(String.format("Ungueltiges Argument: %s. Standardmodus %d wird verwendet.", input, STANDARD_MODE));
+                        mode = STANDARD_MODE;
+                    }
                 }
-            } catch (NumberFormatException e) {
-                logger.warning(String.format("Ungueltiges Argument: %s. Standardmodus %d wird verwendet.", input, STANDARD_MODE));
-                mode = STANDARD_MODE;
             }
         }
 
-        logger.info("--- Simple Activiti gestartet ---");
-        logger.info("Es werden zwei Modus angeboten:");
-        logger.info("1: " + (mode == 1 ? "(aktiv)" : "") + " Maus alle " + (DELAY_MS / 1000) + " Sekunden um " + PIXELS_TO_MOVE + " Pixel bewegen (wie bisher)");
-        logger.info("2: " + (mode == 2 ? "(aktiv)" : "") + " Maus langsam und natuerlich in einem Bereich bewegen");
-        logger.info(String.format("Modus kann als Argument uebergeben werden (1 oder 2). Standard: %d", STANDARD_MODE));
-        logger.info("Druecken Sie STRG+C, um das Programm zu beenden.");
+        logInfo("--- Simple Activiti gestartet ---");
+        logInfo("Es werden zwei Modus angeboten:");
+        logInfo("1: " + (mode == 1 ? "(aktiv)" : "") + " Maus alle " + (DELAY_MS / 1000) + " Sekunden um " + PIXELS_TO_MOVE + " Pixel bewegen (wie bisher)");
+        logInfo("2: " + (mode == 2 ? "(aktiv)" : "") + " Maus langsam und natuerlich in einem Bereich bewegen");
+        logInfo(String.format("Modus kann als Argument uebergeben werden (1 oder 2). Standard: %d", STANDARD_MODE));
+        logInfo("Druecken Sie STRG+C, um das Programm zu beenden.");
 
         try {
             Robot robot = new Robot();
@@ -62,17 +69,17 @@ public class Main {
                 runNaturalMode(robot);
             }
         } catch (AWTException e) {
-            logger.severe("Fehler beim Erstellen der Robot-Instanz. Moeglicherweise fehlen Berechtigungen.");
-            logger.severe(e.toString());
+            logSevere("Fehler beim Erstellen der Robot-Instanz. Moeglicherweise fehlen Berechtigungen.");
+            logSevere(e.toString());
         } catch (InterruptedException e) {
-            logger.info("--- Simple Activiti beendet ---");
+            logInfo("--- Simple Activiti beendet ---");
             Thread.currentThread().interrupt();
         }
     }
 
     @SuppressWarnings("InfiniteLoopStatement") // Endlosschleife ist hier beabsichtigt
     private static void runSimpleMode(Robot robot) throws InterruptedException {
-        logger.info("Einfacher Modus gestartet: Maus wird alle " + (DELAY_MS / 1000) + " Sekunden bewegt.");
+        logInfo("Einfacher Modus gestartet: Maus wird alle " + (DELAY_MS / 1000) + " Sekunden bewegt.");
         while (true) {
             Point currentPos = MouseInfo.getPointerInfo().getLocation();
             int currentX = currentPos.x;
@@ -95,7 +102,7 @@ public class Main {
 
     @SuppressWarnings("InfiniteLoopStatement") // Endlosschleife ist hier beabsichtigt
     private static void runNaturalMode(Robot robot) throws InterruptedException {
-        logger.info("Natuerlicher Modus gestartet: Maus wird langsam und zufaellig bewegt.");
+        logInfo("Natuerlicher Modus gestartet: Maus wird langsam und zufaellig bewegt.");
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         Point startPos = MouseInfo.getPointerInfo().getLocation();
         int baseX = startPos.x;
@@ -141,7 +148,7 @@ public class Main {
             // Prüfen, ob Nutzer die Maus bewegt hat
             Point checkPos = MouseInfo.getPointerInfo().getLocation();
             if (Math.abs(checkPos.x - currentX) > USER_MOVE_TOLERANCE || Math.abs(checkPos.y - currentY) > USER_MOVE_TOLERANCE) {
-                logger.info("Nutzer hat die Maus bewegt. Automatische Bewegung wird abgebrochen.");
+                logInfo("Nutzer hat die Maus bewegt. Automatische Bewegung wird abgebrochen.");
                 return true;
             }
             int dx = target.x - currentX;
@@ -169,7 +176,7 @@ public class Main {
     }
 
     private static Point waitForUserInactivity() throws InterruptedException {
-        logger.info("Warte auf 30 Sekunden Maus-Inaktivitaet...");
+        logInfo("Warte auf 30 Sekunden Maus-Inaktivitaet...");
         long inactiveStart = System.currentTimeMillis();
         Point lastCheck = MouseInfo.getPointerInfo().getLocation();
         while (true) { // Endlosschleife ist hier beabsichtigt
@@ -180,10 +187,28 @@ public class Main {
                 lastCheck = now;
             }
             if (System.currentTimeMillis() - inactiveStart >= INACTIVITY_TIME_MS) {
-                logger.info("30 Sekunden Maus-Inaktivitaet erkannt. Automatische Bewegung wird fortgesetzt.");
+                logInfo("30 Sekunden Maus-Inaktivitaet erkannt. Automatische Bewegung wird fortgesetzt.");
                 return now;
             }
         }
 
+    }
+
+    private static void logInfo(String message) {
+        if (!quietMode) {
+            logger.info(message);
+        }
+    }
+
+    private static void logWarning(String message) {
+        if (!quietMode) {
+            logger.warning(message);
+        }
+    }
+
+    private static void logSevere(String message) {
+        if (!quietMode) {
+            logger.severe(message);
+        }
     }
 }
