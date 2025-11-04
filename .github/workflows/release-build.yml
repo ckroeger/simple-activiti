@@ -19,6 +19,9 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
 
       - name: Build with Maven (set version from tag or snapshot)
         run: |
@@ -36,3 +39,10 @@ jobs:
           name: executable-jar
           path: |
             target/*.jar
+
+      - name: Publish to GitHub Packages
+        run: mvn -B deploy -DskipTests
+        env:
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
