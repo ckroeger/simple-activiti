@@ -19,7 +19,6 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
           cache: 'maven'
-          maven-version: '3.9.6'
 
       - name: Build with Maven (set version from tag or snapshot)
         run: |
