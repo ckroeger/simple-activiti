@@ -3,6 +3,7 @@ name: Build Executable JAR on Release
 on:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -18,8 +19,20 @@ jobs:
           distribution: 'temurin'
           java-version: '21'
 
-      - name: Build with Maven
-        run: mvn clean package
+      - name: Set up Maven 3.9.6
+        uses: s4u/setup-maven-action@v1
+        with:
+          maven-version: '3.9.6'
+
+      - name: Build with Maven (set version from tag or snapshot)
+        run: |
+          if [ "${{ github.event_name }}" = "release" ]; then
+            VERSION=${GITHUB_REF##*/}
+          else
+            VERSION=0.0.1-SNAPSHOT
+          fi
+          mvn -q versions:set -DnewVersion=$VERSION
+          mvn -q clean package
 
       - name: Upload JAR artifact
         uses: actions/upload-artifact@v4
