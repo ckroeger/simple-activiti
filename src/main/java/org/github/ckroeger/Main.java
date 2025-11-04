@@ -105,8 +105,12 @@ public class Main {
             boolean userMoved = moveMouseToTarget(robot, target, screenSize, SHARED_RANDOM);
             if (userMoved) {
                 Point newBase = waitForUserInactivity();
-                baseX = newBase.x;
-                baseY = newBase.y;
+                // Nach Inaktivität: Mauszeiger in die Bildschirmmitte bewegen
+                int centerX = screenSize.width / 2;
+                int centerY = screenSize.height / 2;
+                robot.mouseMove(centerX, centerY);
+                baseX = centerX;
+                baseY = centerY;
             } else {
                 int pause = SHARED_RANDOM.nextInt(PAUSE_MAX_MS - PAUSE_MIN_MS + STANDARD_MODE) + PAUSE_MIN_MS;
                 Thread.sleep(pause);
@@ -119,8 +123,13 @@ public class Main {
         int maxX = Math.min(screenSize.width - STANDARD_MODE, baseX + MOVE_RANGE);
         int minY = Math.max(0, baseY - MOVE_RANGE);
         int maxY = Math.min(screenSize.height - STANDARD_MODE, baseY + MOVE_RANGE);
-        int targetX = minX + random.nextInt(maxX - minX + STANDARD_MODE);
-        int targetY = minY + random.nextInt(maxY - minY + STANDARD_MODE);
+
+        int rangeX = maxX - minX + STANDARD_MODE;
+        int rangeY = maxY - minY + STANDARD_MODE;
+
+        int targetX = (rangeX > 0) ? (minX + random.nextInt(rangeX)) : minX;
+        int targetY = (rangeY > 0) ? (minY + random.nextInt(rangeY)) : minY;
+
         return new Point(targetX, targetY);
     }
 
