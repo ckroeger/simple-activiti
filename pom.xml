@@ -37,6 +37,71 @@
                     </archive>
                 </configuration>
             </plugin>
+
+            <!-- Maven Shade Plugin: Erstellt ein "fat JAR" mit allen Dependencies -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.github.ckroeger.Main</mainClass>
+                                </transformer>
+                            </transformers>
+                            <finalName>simple-activiti-${project.version}</finalName>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Launch4j Maven Plugin: Erstellt Windows .exe aus JAR -->
+            <plugin>
+                <groupId>com.akathist.maven.plugins.launch4j</groupId>
+                <artifactId>launch4j-maven-plugin</artifactId>
+                <version>2.5.0</version>
+                <executions>
+                    <execution>
+                        <id>l4j-clui</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>launch4j</goal>
+                        </goals>
+                        <configuration>
+                            <headerType>console</headerType>
+                            <jar>${project.build.directory}/simple-activiti-${project.version}.jar</jar>
+                            <outfile>${project.build.directory}/simple-activiti-${project.version}.exe</outfile>
+                            <errTitle>Simple Activiti Error</errTitle>
+                            <classPath>
+                                <mainClass>org.github.ckroeger.Main</mainClass>
+                            </classPath>
+                            <jre>
+                                <minVersion>21</minVersion>
+                                <opts>
+                                    <opt>-Dfile.encoding=UTF-8</opt>
+                                </opts>
+                            </jre>
+                            <versionInfo>
+                                <fileVersion>1.0.0.0</fileVersion>
+                                <txtFileVersion>${project.version}</txtFileVersion>
+                                <fileDescription>Simple Activiti - Keep your PC active</fileDescription>
+                                <copyright>GitHub ckroeger</copyright>
+                                <productVersion>1.0.0.0</productVersion>
+                                <txtProductVersion>${project.version}</txtProductVersion>
+                                <productName>Simple Activiti</productName>
+                                <internalName>simple-activiti</internalName>
+                                <originalFilename>simple-activiti.exe</originalFilename>
+                            </versionInfo>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
