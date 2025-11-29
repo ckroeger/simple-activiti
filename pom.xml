@@ -58,6 +58,22 @@
                             <finalName>simple-activiti-${project.version}</finalName>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>shade-quiet</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>org.github.ckroeger.MainQuiet</mainClass>
+                                </transformer>
+                            </transformers>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>quiet</shadedClassifierName>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
 

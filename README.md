@@ -56,7 +56,7 @@ java -jar target/simple-activiti-*.jar [mode] [-q]
 - `-q` - Quiet mode (suppresses log output)
 
 Example:
-
+**Windows Executable (portable, no Java needed):**
 ```cmd
 simple-activiti-1.0.0.exe 2
 ```
