@@ -90,7 +90,7 @@
                             <goal>launch4j</goal>
                         </goals>
                         <configuration>
-                            <headerType>console</headerType>
+                            <headerType>gui</headerType>
                             <jar>${project.build.directory}/simple-activiti-${project.version}.jar</jar>
                             <outfile>${project.build.directory}/simple-activiti-${project.version}.exe</outfile>
                             <errTitle>Simple Activiti Error</errTitle>
